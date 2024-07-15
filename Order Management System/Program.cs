@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OrderSys.Repository.Data;
+using Talabat.Core;
+using Talabat.Repository;
 
 namespace Order_Management_System
 {
@@ -13,6 +15,8 @@ namespace Order_Management_System
 
             #region Services
             // Add services to the container.
+
+            builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 
             builder.Services.AddDbContext<OrderManagementDbContext>(options =>
             {
