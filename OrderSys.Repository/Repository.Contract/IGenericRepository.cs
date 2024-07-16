@@ -1,4 +1,5 @@
 ﻿using OrderSys.Core.Entities;
+using OrderSys.Core.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace OrderSys.Core.Repository.Contract
     public interface IGenericRepository<T> where T : BaseEntity
     {
         Task<T?> GetAsync(int id);
+        Task<bool> CheckUserNameExsist(Ispecifications<T> spec);
         Task<IReadOnlyList<T>> GetAllAsync();
         void Add(T entity);
         void Update(T entity);

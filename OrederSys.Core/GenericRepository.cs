@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Repository.Contract;
+using OrderSys.Core.Specifications;
 using OrderSys.Repository.Data;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,9 @@ namespace OrderSys.Repository
         public async Task<T?> GetAsync(int id)
         => await _dbContext.Set<T>().FindAsync(id);
 
+        public async Task<bool> CheckUserNameExsist(Ispecifications<T> spec)
+       => await  ApplySpecifications(spec).AnyAsync();
+
         public void Add(T entity)
         => _dbContext.Set<T>().Add(entity); 
 
@@ -33,5 +37,12 @@ namespace OrderSys.Repository
 
         public void Update(T entity)
         => _dbContext.Update(entity);
+
+
+        private IQueryable<T> ApplySpecifications(Ispecifications<T> spec)
+        {
+            return SpecificationEvaluater<T>.GetQuery(_dbContext.Set<T>(), spec);
+        }
+
     }
 }

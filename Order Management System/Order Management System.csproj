@@ -16,10 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\OrderSys.Service\OrderSys.Service.csproj" />
     <ProjectReference Include="..\OrederSys.Core\OrderSys.Repository.csproj" />
   </ItemGroup>
 

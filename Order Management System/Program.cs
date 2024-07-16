@@ -1,7 +1,12 @@
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
+using OrderSys.Service.AuthService;
+using System.Text;
 using Talabat.Core;
 using Talabat.Repository;
 
@@ -22,6 +27,31 @@ namespace Order_Management_System
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+
+            //add auth service
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(JwtBearerOptions =>
+                {
+                    JwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = builder.Configuration["jwt:validIssuer"],
+                        ValidateAudience = true,
+                        ValidAudience = builder.Configuration["jwt:validAudience"],
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwt:AuthKey"])),
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                    };
+                });
+            //add DI for auth service to add token
+            builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -69,10 +99,11 @@ namespace Order_Management_System
 
             app.UseHttpsRedirection();
 
+            app.MapControllers();
+
             app.UseAuthorization();
 
-
-            app.MapControllers(); 
+            app.UseAuthentication();
             #endregion
 
             app.Run();

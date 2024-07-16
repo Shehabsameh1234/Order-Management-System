@@ -9,10 +9,10 @@ namespace OrderSys.Core.Entities.Enums
 {
     public enum UserRole
     {
-        [EnumMember(Value = "Admin")]
+        [EnumMember(Value = "admin")]
         Admin,
 
-        [EnumMember(Value = "Customer")]
+        [EnumMember(Value = "customer")]
         Customer,
     }
 }
