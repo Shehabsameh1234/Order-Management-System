@@ -8,7 +8,10 @@ namespace Order_Management_System.Helpers
     {
         public MappingProfile()
         {
-            CreateMap<Product, ProductDto>();
+            CreateMap<Product, ProductDto>().ReverseMap();
+
+            CreateMap<Customer, CustomerDto>().ReverseMap();
+
         }
     }
 }

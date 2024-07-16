@@ -7,6 +7,7 @@ using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
 using OrderSys.Repository.DataSeeding;
 using OrderSys.Service.AuthService;
+using OrderSys.Service.CustomerService;
 using OrderSys.Service.ProductService;
 using System.Text;
 using Talabat.Core;
@@ -26,6 +27,8 @@ namespace Order_Management_System
             builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 
             builder.Services.AddScoped(typeof(IProductService), typeof(ProductService));
+
+            builder.Services.AddScoped(typeof(ICustomerService), typeof(CustomerService));
 
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));

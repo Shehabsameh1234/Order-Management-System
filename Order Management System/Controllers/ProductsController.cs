@@ -57,25 +57,29 @@ namespace Order_Management_System.Controllers
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult> AddNewProduct(Product model)
+        public async Task<ActionResult> AddNewProduct(ProductDto model)
         {
-           var result = await _productService.AddProductAsync(model);
+            var mappedModel = _mapper.Map<ProductDto,Product>(model);
+
+           var result = await _productService.AddProductAsync(mappedModel);
 
            if (result == 0) return BadRequest(new ApisResponse(400));
 
-           return Ok(model); 
+           return Ok(mappedModel); 
         }
         [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPut]
-        public async Task<ActionResult> UpdateProduct(Product product)
+        public async Task<ActionResult> UpdateProduct(ProductDto model)
         {
-            var result =await _productService.UpdateProductAsync(product);
+            var mappedModel = _mapper.Map<ProductDto, Product>(model);
+
+            var result =await _productService.UpdateProductAsync(mappedModel);
 
             if (result ==null) return BadRequest(new ApisResponse(400));
 
-            return Ok(product);
+            return Ok(mappedModel);
         }
 
 
