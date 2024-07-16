@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OrderSys.Repository.Data;
 
@@ -11,9 +12,11 @@ using OrderSys.Repository.Data;
 namespace OrderSys.Repository.Data.Migrations
 {
     [DbContext(typeof(OrderManagementDbContext))]
-    partial class OrderManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240716224156_update")]
+    partial class update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,7 +85,7 @@ namespace OrderSys.Repository.Data.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PaymentMethod")
+                    b.Property<string>("PaymentMethods")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

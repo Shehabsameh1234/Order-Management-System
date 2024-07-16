@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OrderSys.Core.Entities;
+using OrderSys.Core.Entities.Enums;
 
 namespace OrderSys.Repository.Data.Configurations
 {
@@ -15,7 +16,16 @@ namespace OrderSys.Repository.Data.Configurations
             builder.HasOne(o => o.Customer)
                    .WithMany(c => c.Orders)
                    .HasForeignKey(o => o.CustomerId).OnDelete(DeleteBehavior.Cascade);
-    
+
+            builder.Property(o => o.PaymentMethod).HasConversion(
+           (oMethod) => oMethod.ToString(),
+           (oMethod) => (PaymentMethods)Enum.Parse(typeof(PaymentMethods), oMethod));
+
+            builder.Property(o => o.Status).HasConversion(
+        (oMethod) => oMethod.ToString(),
+        (oMethod) => (OrderStatus)Enum.Parse(typeof(OrderStatus), oMethod));
+
+
         }
     }
 }

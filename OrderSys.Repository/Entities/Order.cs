@@ -13,8 +13,8 @@ namespace OrderSys.Core.Entities
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public decimal TotalAmount { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
-        public string PaymentMethod { get; set; } = null!;
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public PaymentMethods PaymentMethod { get; set; }
+        public OrderStatus Status { get; set; }
         public Customer Customer { get; set; } = null!;
     }
 }

@@ -18,8 +18,7 @@ namespace OrderSys.Repository.Data.Configurations
 
             builder.Property(u => u.Role).HasConversion(
             (Urole) => Urole.ToString(),
-            (Urole) => (UserRole)Enum.Parse(typeof(UserRole), Urole)
-            );
+            (Urole) => (UserRole)Enum.Parse(typeof(UserRole), Urole));
         }
     }
 }

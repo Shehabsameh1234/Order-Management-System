@@ -1,6 +1,5 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -10,6 +9,7 @@ using OrderSys.Repository.Data;
 using OrderSys.Repository.DataSeeding;
 using OrderSys.Service.AuthService;
 using OrderSys.Service.CustomerService;
+using OrderSys.Service.OrderService;
 using OrderSys.Service.ProductService;
 using System.Text;
 using Talabat.Core;
@@ -38,6 +38,7 @@ namespace Order_Management_System
 
             builder.Services.AddScoped(typeof(ICustomerService), typeof(CustomerService));
 
+            builder.Services.AddScoped(typeof(IOrderService), typeof(OrderService));
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -45,7 +46,6 @@ namespace Order_Management_System
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-
 
             //add auth service
             builder.Services.AddAuthentication(options =>

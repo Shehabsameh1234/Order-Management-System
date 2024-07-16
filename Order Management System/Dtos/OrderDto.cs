@@ -11,5 +11,6 @@ namespace Order_Management_System.Dtos
         public decimal TotalAmount { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
         public string PaymentMethod { get; set; } = null!;
+        public string Status { get; set; } = null!;
     }
 }
