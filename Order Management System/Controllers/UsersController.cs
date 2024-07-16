@@ -24,10 +24,23 @@ namespace Order_Management_System.Controllers
             _unitOfWork = unitOfWork;
             _authService = authService;
         }
+        [HttpPost("logIn")]
+        public async Task<ActionResult<UserDto>> LogIn(LogInDto model)
+        {
+            var spec = new UserSpecifications(model.Username);
+            var user = await _unitOfWork.Repository<User>().GetUserByUserName(spec);
+            if(user  == null || user.PasswordHash != model.Password) return NotFound(new ApisResponse(404,"invalid login"));
+            return Ok(new UserDto() 
+            { 
+                Username = user.Username,
+                Role=user.Role.ToString(),
+                Token=await _authService.CreateTokenAsync(user)
+            });
+        }
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto model)
         {
-            if (CheckEmailExist(model.Username).Result.Value)
+            if (CheckUserNameExist(model.Username).Result.Value)
                 return NotFound(new ApisResponse(400, "userName in use try another one"));
 
             if (model.Role !=UserRole.Admin.ToString() && model.Role !=UserRole.Customer.ToString())
@@ -36,7 +49,7 @@ namespace Order_Management_System.Controllers
             var user = new User()
             { 
                 Username=model.Username,
-                PasswordHash=model.PasswordHash,
+                PasswordHash=model.Password,
                 Role= (UserRole)Enum.Parse(typeof(UserRole), model.Role),
             };
             _unitOfWork.Repository<User>().Add(user);
@@ -46,12 +59,12 @@ namespace Order_Management_System.Controllers
             return Ok(new UserDto() 
             {  
                 Username=user.Username,
-                PasswordHash=user.PasswordHash,
                 Role=model.Role.ToString(),
+                Token="LogIn For Token"
             });
         }
-        [HttpGet("emailexist")]
-        public async  Task<ActionResult<bool>> CheckEmailExist(string userName)
+        [HttpGet("userNameExist")]
+        public async  Task<ActionResult<bool>> CheckUserNameExist(string userName)
         {
             var spec = new UserSpecifications(userName);
             return await _unitOfWork.Repository<User>().CheckUserNameExsist(spec);

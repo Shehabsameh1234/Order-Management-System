@@ -20,7 +20,7 @@ namespace OrderSys.Repository.Data.Configurations
 
             builder.HasOne(i => i.Order)
                    .WithOne()
-                   .HasForeignKey<Invoice>(i => i.OrderId);
+                   .HasForeignKey<Invoice>(i => i.OrderId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

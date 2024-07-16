@@ -29,6 +29,9 @@ namespace OrderSys.Repository
         public async Task<bool> CheckUserNameExsist(Ispecifications<T> spec)
        => await  ApplySpecifications(spec).AnyAsync();
 
+        public async Task<T?> GetUserByUserName(Ispecifications<T> spec)
+            =>await ApplySpecifications(spec).FirstOrDefaultAsync();
+        
         public void Add(T entity)
         => _dbContext.Set<T>().Add(entity); 
 
@@ -44,5 +47,6 @@ namespace OrderSys.Repository
             return SpecificationEvaluater<T>.GetQuery(_dbContext.Set<T>(), spec);
         }
 
+       
     }
 }

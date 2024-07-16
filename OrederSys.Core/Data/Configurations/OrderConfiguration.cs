@@ -14,7 +14,7 @@ namespace OrderSys.Repository.Data.Configurations
 
             builder.HasOne(o => o.Customer)
                    .WithMany(c => c.Orders)
-                   .HasForeignKey(o => o.CustomerId);
+                   .HasForeignKey(o => o.CustomerId).OnDelete(DeleteBehavior.Cascade);
     
         }
     }

@@ -10,7 +10,7 @@ namespace Order_Management_System.Dtos
         [Required]
         [RegularExpression("^(?=.*[A-Z])(?=.*\\d)(?=.*[a-zA-Z]).{6,}$",
             ErrorMessage = "password must contain at least one number , one upper case charachter ,one alphanumeric")]
-        public string PasswordHash { get; set; } = null!;
+        public string Password { get; set; } = null!;
         [Required]
         public string Role { get; set; } =null!;
     }

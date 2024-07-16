@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
+using OrderSys.Repository.DataSeeding;
 using OrderSys.Service.AuthService;
 using System.Text;
 using Talabat.Core;
@@ -72,12 +73,16 @@ namespace Order_Management_System
             //3-generate object from StoreContext and _IdentityDbContext
             var _DbContext = service.GetRequiredService<OrderManagementDbContext>();
             
+            
             //4- log the ex using loggerFactory Class and generate object from loggerFactory
             var loggerFactory = service.GetRequiredService<ILoggerFactory>();
             try
             {
                 //4-add migration
                 await _DbContext.Database.MigrateAsync();
+
+                //dataSeeding
+                await DataSeed.SeedAsync(_DbContext);
                 
             }
             catch (Exception ex)

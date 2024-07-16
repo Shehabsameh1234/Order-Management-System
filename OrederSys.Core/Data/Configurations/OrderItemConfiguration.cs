@@ -15,11 +15,11 @@ namespace OrderSys.Repository.Data.Configurations
         {
             builder.HasOne(oi => oi.Order)
                    .WithMany(o => o.OrderItems)
-                   .HasForeignKey(oi => oi.OrderId);
+                   .HasForeignKey(oi => oi.OrderId).OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(oi => oi.Product)
                    .WithMany()
-                   .HasForeignKey(oi => oi.ProductId);
+                   .HasForeignKey(oi => oi.ProductId).OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(oi => oi.UnitPrice)
                    .HasColumnType("decimal (18,2)");

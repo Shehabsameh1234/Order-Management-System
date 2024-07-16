@@ -12,6 +12,7 @@ namespace OrderSys.Core.Repository.Contract
     {
         Task<T?> GetAsync(int id);
         Task<bool> CheckUserNameExsist(Ispecifications<T> spec);
+        Task<T?> GetUserByUserName(Ispecifications<T> spec);
         Task<IReadOnlyList<T>> GetAllAsync();
         void Add(T entity);
         void Update(T entity);
