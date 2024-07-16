@@ -1,7 +1,9 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Order_Management_System.Helpers;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
@@ -23,6 +25,12 @@ namespace Order_Management_System
 
             #region Services
             // Add services to the container.
+
+            builder.Services.AddControllers()
+              .AddNewtonsoftJson(Options =>
+              {
+                  Options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+              });
 
             builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 
@@ -62,8 +70,6 @@ namespace Order_Management_System
             //add DI for auth service to add token
             builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
 
-
-            builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(); 

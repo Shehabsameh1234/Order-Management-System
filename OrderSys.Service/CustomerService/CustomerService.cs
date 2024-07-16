@@ -1,5 +1,7 @@
 ﻿using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
+using OrderSys.Core.Specifications.CustomerSpecifications;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +26,13 @@ namespace OrderSys.Service.CustomerService
            var result =await _unitOfWork.CompleteAsync();
 
             return result;
+        }
+
+        public async Task<Customer?> GetCustomer(int id)
+        {
+            var spec = new CustomerSpecifications(id);
+            var customer =await _unitOfWork.Repository<Customer>().GetWithSpecAsync(spec);
+            return customer ;
         }
     }
 }

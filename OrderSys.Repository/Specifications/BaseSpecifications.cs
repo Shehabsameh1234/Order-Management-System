@@ -1,4 +1,5 @@
-﻿using OrderSys.Core.Entities;
+﻿
+using OrderSys.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace OrderSys.Core.Specifications
     public class BaseSpecifications<T> : Ispecifications<T> where T : BaseEntity
     {
         public Expression<Func<T, bool>> Criteria { get; set; } = null!;
+        public List<Expression<Func<T, object>>> Includes { get; set; } = new List<Expression<Func<T, object>>>();
+
+        
         public BaseSpecifications()
         {
             
@@ -19,5 +23,6 @@ namespace OrderSys.Core.Specifications
         {
             Criteria = criteria;
         }
+
     }
 }

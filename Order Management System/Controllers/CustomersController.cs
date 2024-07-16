@@ -31,5 +31,16 @@ namespace Order_Management_System.Controllers
 
             return Ok(mappedCustomer);
         }
+        [HttpGet("{id}/orders")]
+        public async Task<ActionResult<CustomerDto>> GetOredersForCustomer(int id)
+        {
+            var customer =await _customerService.GetCustomer(id);
+
+            if (customer == null) return NotFound(new ApisResponse(404));
+
+            var mappedCustomer = _mapper.Map<Customer, CustomerDto>(customer);
+
+            return Ok(mappedCustomer);
+        }
     }
 }

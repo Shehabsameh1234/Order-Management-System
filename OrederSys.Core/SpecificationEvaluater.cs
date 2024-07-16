@@ -1,4 +1,5 @@
-﻿using OrderSys.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using OrderSys.Core.Entities;
 using OrderSys.Core.Specifications;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,9 @@ namespace OrderSys.Repository
             if (spec.Criteria is not null)
                 query = query.Where(spec.Criteria);
 
-            //query = spec.Includes.Aggregate(query, (currentQuery, includeExpression) => currentQuery.Include(includeExpression));
+            query = spec.Includes.Aggregate(query, (currentQuery, includeExpression) => currentQuery.Include(includeExpression));
+
+            
 
             return query;
 
