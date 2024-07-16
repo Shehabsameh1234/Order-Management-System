@@ -1,12 +1,13 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Order_Management_System.Helpers;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
 using OrderSys.Repository.DataSeeding;
 using OrderSys.Service.AuthService;
+using OrderSys.Service.ProductService;
 using System.Text;
 using Talabat.Core;
 using Talabat.Repository;
@@ -23,6 +24,11 @@ namespace Order_Management_System
             // Add services to the container.
 
             builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+
+            builder.Services.AddScoped(typeof(IProductService), typeof(ProductService));
+
+
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             builder.Services.AddDbContext<OrderManagementDbContext>(options =>
             {

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OrderSys.Repository\OrderSys.Core.csproj" />
+    <ProjectReference Include="..\OrederSys.Core\OrderSys.Repository.csproj" />
   </ItemGroup>
 
 </Project>

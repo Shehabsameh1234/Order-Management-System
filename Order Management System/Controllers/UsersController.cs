@@ -12,9 +12,8 @@ using Talabat.Repository;
 
 namespace Order_Management_System.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    
+    public class UsersController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
@@ -24,12 +23,14 @@ namespace Order_Management_System.Controllers
             _unitOfWork = unitOfWork;
             _authService = authService;
         }
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [HttpPost("logIn")]
         public async Task<ActionResult<UserDto>> LogIn(LogInDto model)
         {
             var spec = new UserSpecifications(model.Username);
             var user = await _unitOfWork.Repository<User>().GetUserByUserName(spec);
-            if(user  == null || user.PasswordHash != model.Password) return NotFound(new ApisResponse(404,"invalid login"));
+            if(user  == null || user.PasswordHash != model.Password) return BadRequest(new ApisResponse(400,"invalid login"));
             return Ok(new UserDto() 
             { 
                 Username = user.Username,
@@ -37,14 +38,16 @@ namespace Order_Management_System.Controllers
                 Token=await _authService.CreateTokenAsync(user)
             });
         }
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto model)
         {
             if (CheckUserNameExist(model.Username).Result.Value)
-                return NotFound(new ApisResponse(400, "userName in use try another one"));
+                return BadRequest(new ApisResponse(400, "userName in use try another one"));
 
             if (model.Role !=UserRole.Admin.ToString() && model.Role !=UserRole.Customer.ToString())
-                return NotFound(new ApisResponse(400, "this role does not exist try another (Admin,Customer)"));
+                return BadRequest(new ApisResponse(400, "this role does not exist try another (Admin,Customer)"));
 
             var user = new User()
             { 
