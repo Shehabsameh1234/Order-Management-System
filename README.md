@@ -1,20 +1,19 @@
 ## Introduction
 
-This project is a RESTful API for an eCommerce application built using .NET Core, featuring an admin dashboard. It provides functionalities for managing products, categories, orders, users, and includes an intuitive admin interface.
+This project is a RESTful API for an  order system application built using .NET Core , It provides functionalities for managing products, orders, users ,invoices ,customers.
 
 ## Features
 
 - User authentication and authorization
 - Product management (CRUD operations)
-- Category management (CRUD operations)
-- Order management (CRUD operations)
-- Cart management
-- Payment processing
-- Admin dashboard with enhanced features
+- order management (CRUD operations)
+- user management (CRUD operations)
+- invoice management
+- customer management
 
 ## Technologies Used
 
-- .NET Core 6.0
+- .NET Core 8.0
 - Entity Framework Core
 - SQL Server
 - Swagger for API documentation
