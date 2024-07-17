@@ -8,18 +8,17 @@ using OrderSys.Core.Service.Contract;
 
 namespace Order_Management_System.Controllers
 {
-   
     public class CustomersController : BaseApiController
     {
         private readonly ICustomerService _customerService;
         private readonly IMapper _mapper;
-
         public CustomersController(ICustomerService customerService,IMapper mapper)
         {
             _customerService = customerService;
             _mapper = mapper;
         }
-
+        [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult<Customer>> AddNewCustomer(CustomerDto model)
         {
@@ -31,6 +30,8 @@ namespace Order_Management_System.Controllers
 
             return Ok(mappedCustomer);
         }
+        [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [HttpGet("{id}/orders")]
         public async Task<ActionResult<CustomerDto>> GetOredersForCustomer(int id)
         {

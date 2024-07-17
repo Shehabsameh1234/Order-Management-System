@@ -17,7 +17,6 @@ namespace Order_Management_System.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
-
         public UsersController(IUnitOfWork unitOfWork,IAuthService authService)
         {
             _unitOfWork = unitOfWork;
@@ -72,8 +71,6 @@ namespace Order_Management_System.Controllers
             var spec = new UserSpecifications(userName);
             return await _unitOfWork.Repository<User>().CheckUserNameExsist(spec);
         }
-
-
     }
     
 }

@@ -17,13 +17,10 @@ namespace Order_Management_System.Controllers
     {
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public ProductsController(IProductService productService,IMapper mapper,IUnitOfWork unitOfWork)
+        public ProductsController(IProductService productService,IMapper mapper)
         {
             _productService = productService;
-            _mapper = mapper;
-            _unitOfWork = unitOfWork;
+            _mapper = mapper; 
         }
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
@@ -38,7 +35,6 @@ namespace Order_Management_System.Controllers
 
             return Ok(mappedProducts);   
         }
-
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [HttpGet("{id}")]
