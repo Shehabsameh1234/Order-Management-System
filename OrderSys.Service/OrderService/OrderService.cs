@@ -32,13 +32,28 @@ namespace OrderSys.Service.OrderService
                 var product =await _unitOfWork.Repository<Product>().GetAsync(item.ProductId);
                 if (product == null) return null;
                 item.UnitPrice = product.Price;
-                item.Discount = 0;
+
+                //chaeck the quantity
                 if (item.Quantity > product.Stock || item.Quantity == 0) return null;
-                order.TotalAmount = order.TotalAmount + (item.UnitPrice*item.Quantity);
+
+                //set orderItems value
+                order.TotalAmount = order.OrderItems.Sum(o => o.UnitPrice * o.Quantity);
             };
-            //set the discount
-            if (order.TotalAmount > 100 && order.TotalAmount < 200) order.TotalAmount = order.TotalAmount - (order.TotalAmount * 5 / 100);
-            else if (order.TotalAmount > 200) order.TotalAmount =order.TotalAmount-( order.TotalAmount * 10 / 100);
+
+            //set dicsount property based on total amount
+            foreach (var item in order.OrderItems)
+            {
+                if (order.TotalAmount > 100 && order.TotalAmount <= 200) item.Discount = 5M;
+                else if (order.TotalAmount > 200) item.Discount = 10M;
+                else item.Discount = 0;
+            }
+
+            //set the discount on totalAmount
+            if (order.TotalAmount > 100 && order.TotalAmount <= 200)
+                order.TotalAmount = order.TotalAmount - (order.TotalAmount * 5 / 100);
+
+            else if (order.TotalAmount > 200)
+                order.TotalAmount =order.TotalAmount-( order.TotalAmount * 10 / 100);
 
             //add to dataBase
             _unitOfWork.Repository<Order>().Add(order);
@@ -77,5 +92,7 @@ namespace OrderSys.Service.OrderService
 
             return order;
         }
+
+
     }
 }
