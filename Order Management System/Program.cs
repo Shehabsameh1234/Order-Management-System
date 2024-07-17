@@ -9,6 +9,7 @@ using OrderSys.Repository.Data;
 using OrderSys.Repository.DataSeeding;
 using OrderSys.Service.AuthService;
 using OrderSys.Service.CustomerService;
+using OrderSys.Service.InvoiceSerivce;
 using OrderSys.Service.OrderService;
 using OrderSys.Service.ProductService;
 using System.Text;
@@ -39,6 +40,9 @@ namespace Order_Management_System
             builder.Services.AddScoped(typeof(ICustomerService), typeof(CustomerService));
 
             builder.Services.AddScoped(typeof(IOrderService), typeof(OrderService));
+
+            builder.Services.AddScoped(typeof(IInvoiceService), typeof(InvoiceSerive));
+
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 

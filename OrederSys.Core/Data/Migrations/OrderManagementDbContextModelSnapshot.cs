@@ -40,7 +40,7 @@ namespace OrderSys.Repository.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.Invoice", b =>
@@ -65,7 +65,7 @@ namespace OrderSys.Repository.Data.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.ToTable("Invoices");
+                    b.ToTable("Invoices", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.Order", b =>
@@ -97,7 +97,7 @@ namespace OrderSys.Repository.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.OrderItem", b =>
@@ -129,7 +129,7 @@ namespace OrderSys.Repository.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.Product", b =>
@@ -152,7 +152,7 @@ namespace OrderSys.Repository.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.User", b =>
@@ -180,7 +180,7 @@ namespace OrderSys.Repository.Data.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("OrderSys.Core.Entities.Invoice", b =>
