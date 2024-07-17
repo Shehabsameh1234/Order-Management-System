@@ -1,5 +1,7 @@
-﻿using OrderSys.Core.Entities;
+﻿using OrderSys.Core;
+using OrderSys.Core.Entities;
 using OrderSys.Core.Entities.Enums;
+using OrderSys.Core.Send_Email;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Core.Specifications.OrderSpecifications;
 using System;
@@ -91,6 +93,19 @@ namespace OrderSys.Service.OrderService
             if (result == 0) return null;
 
             return order;
+        }
+        public async void sendEmailToCustomer(Order order)
+        {
+            //get customer
+            var customer = await _unitOfWork.Repository<Customer>().GetAsync(order.CustomerId);
+            var email = new Email()
+            {
+                Title = "Update Order Status",
+                To = customer.Email,
+                Body = $"you order number {order.Id} has been blaced",
+            };
+            EmailSetting.SendEmail(email);
+
         }
 
 

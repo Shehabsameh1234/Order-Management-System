@@ -78,6 +78,8 @@ namespace Order_Management_System.Controllers
 
             if (order == null) return NotFound(new ApisResponse(404));
 
+            if(order.Status == OrderStatus.placed) return BadRequest(new ApisResponse(400));
+
             order.Status = OrderStatus.placed;
 
             var updatedOrder =await _orderService.UpdateOrderStatus(order);
@@ -85,6 +87,8 @@ namespace Order_Management_System.Controllers
             if(updatedOrder == null) return NotFound(new ApisResponse(404));
 
             await _invoiceService.GenerateIvoiceForOrderAsync(updatedOrder);
+
+            _orderService.sendEmailToCustomer(updatedOrder);
 
             return Ok(_mapper.Map<Order , OrderDto>(updatedOrder));
         }

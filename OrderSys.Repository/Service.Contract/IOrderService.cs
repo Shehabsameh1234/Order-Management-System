@@ -14,5 +14,7 @@ namespace OrderSys.Core.Service.Contract
         Task<IReadOnlyList<Order>> GetAllOrdersAsync();
         Task<Order?> UpdateOrderStatus(Order order);
 
+        void sendEmailToCustomer(Order order);
+
     }
 }
