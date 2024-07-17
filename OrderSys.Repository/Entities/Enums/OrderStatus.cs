@@ -12,10 +12,8 @@ namespace OrderSys.Core.Entities.Enums
         [EnumMember(Value ="pendig")]
         Pending,
 
-        [EnumMember(Value = "Payment Recieved")]
-        PaymentRecieved,
+        [EnumMember(Value = "placed")]
+        placed,
 
-        [EnumMember(Value = "Payment Faild")]
-        PaymentFaild
     }
 }

@@ -1,5 +1,7 @@
 ﻿using OrderSys.Core.Entities;
+using OrderSys.Core.Entities.Enums;
 using OrderSys.Core.Service.Contract;
+using OrderSys.Core.Specifications.OrderSpecifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +20,62 @@ namespace OrderSys.Service.OrderService
             _unitOfWork = unitOfWork;
         }
 
-        //public async Task<int> CreateNewOrder(Order order)
-        //{
+        public async Task<Order?> CreateNewOrder(Order order)
+        {
+            //check customer if exist
+            var customer = await _unitOfWork.Repository<Customer>().GetAsync(order.CustomerId);
+            if (customer == null) return null; 
+            
+            //set the right data based on product repo
+            foreach (var item in order.OrderItems)
+            {
+                var product =await _unitOfWork.Repository<Product>().GetAsync(item.ProductId);
+                if (product == null) return null;
+                item.UnitPrice = product.Price;
+                item.Discount = 0;
+                if (item.Quantity > product.Stock || item.Quantity == 0) return null;
+                order.TotalAmount = order.TotalAmount + (item.UnitPrice*item.Quantity);
+            };
+            //set the discount
+            if (order.TotalAmount > 100 && order.TotalAmount < 200) order.TotalAmount = order.TotalAmount - (order.TotalAmount * 5 / 100);
+            else if (order.TotalAmount > 200) order.TotalAmount =order.TotalAmount-( order.TotalAmount * 10 / 100);
 
+            //add to dataBase
+            _unitOfWork.Repository<Order>().Add(order);
 
+            var result = await _unitOfWork.CompleteAsync();
+            if (result == 0) return null;
 
+            return order;
+        }
 
-        //    _unitOfWork.Repository<Order>().Add(order);
+        public Task<IReadOnlyList<Order>> GetAllOrdersAsync()
+        {
+            var spec = new OrderSpecifications();
 
-        //    var result =await _unitOfWork.CompleteAsync();
+            var orders = _unitOfWork.Repository<Order>().GetAllWithSpecAsync(spec);
 
-        //    return result;
-        //}
+            return orders;
+        }
+
+        public async Task<Order?> GetOrderData(int id)
+        {
+            var spec = new OrderSpecifications(id);
+
+            var order =await _unitOfWork.Repository<Order>().GetWithSpecAsync(spec);
+
+            return order;
+        }
+
+        public async Task<Order?> UpdateOrderStatus(Order order)
+        {
+            _unitOfWork.Repository<Order>().Update(order);
+
+            var result = await _unitOfWork.CompleteAsync();
+
+            if (result == 0) return null;
+
+            return order;
+        }
     }
 }

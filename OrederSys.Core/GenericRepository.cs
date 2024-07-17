@@ -31,10 +31,10 @@ namespace OrderSys.Repository
 
         public async Task<T?> GetUserByUserName(Ispecifications<T> spec)
         =>await ApplySpecifications(spec).FirstOrDefaultAsync();
-
         public async Task<T?> GetWithSpecAsync(Ispecifications<T> spec)
         => await ApplySpecifications(spec).FirstOrDefaultAsync();
-
+        public async Task<IReadOnlyList<T>> GetAllWithSpecAsync(Ispecifications<T> spec)
+        =>await  ApplySpecifications(spec).ToListAsync();
         public void Add(T entity)
         => _dbContext.Set<T>().Add(entity); 
 
@@ -50,6 +50,6 @@ namespace OrderSys.Repository
             return SpecificationEvaluater<T>.GetQuery(_dbContext.Set<T>(), spec);
         }
 
-  
+      
     }
 }

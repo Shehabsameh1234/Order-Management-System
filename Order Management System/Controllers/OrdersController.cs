@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Order_Management_System.Dtos;
 using Order_Management_System.Errors;
 using OrderSys.Core.Entities;
+using OrderSys.Core.Entities.Enums;
 using OrderSys.Core.Service.Contract;
 
 namespace Order_Management_System.Controllers
@@ -19,17 +22,67 @@ namespace Order_Management_System.Controllers
             _orderService = orderService;
             _mapper = mapper;
         }
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
+        [HttpPost]
+        public async Task<ActionResult<OrderDto>> CreateOrder(OrderDto orderDto)
+        {
+            //set the paymentMethod and status
+            orderDto.Status = OrderStatus.Pending.ToString()    ;
+            if (orderDto.PaymentMethod != PaymentMethods.Paypal.ToString() && orderDto.PaymentMethod != PaymentMethods.CreditCard.ToString())
+                orderDto.PaymentMethod = PaymentMethods.Cash.ToString();
 
-        //[HttpPost]
-        //public async Task<ActionResult<Order>> CreateOrder(OrderDto orderDto)
-        //{
-        //    var mappedOrder =_mapper.Map<OrderDto,Order>(orderDto);
+            var mappedOrder = _mapper.Map<OrderDto, Order>(orderDto);
 
-        //    var result=await _orderService.CreateNewOrder(mappedOrder);
+            var result = await _orderService.CreateNewOrder(mappedOrder);
 
-        //    if (result != 0) return BadRequest(new ApisResponse(400));
+            if (result == null) return BadRequest(new ApisResponse(400));
 
-        //    return Ok(mappedOrder);
-        //}
+            return Ok(_mapper.Map<Order, OrderDto>(mappedOrder));
+        }
+
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
+        [HttpGet("{id}")]
+        public async Task<ActionResult<OrderDto>> GetOrder(int id)
+        {
+            var order = await _orderService.GetOrderData(id);
+
+            if (order == null) return NotFound(new ApisResponse(404));
+
+            return Ok(_mapper.Map<Order, OrderDto>(order));
+        }
+
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [HttpGet]
+        public async Task<ActionResult<OrderDto>> GetOrders()
+        {
+            var orders = await _orderService.GetAllOrdersAsync();
+
+            if (orders == null) return NotFound(new ApisResponse(404));
+
+            return Ok(_mapper.Map < IReadOnlyList<Order>, IReadOnlyList<OrderDto>>(orders));
+        }
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [HttpPut("{id}/status")]
+        public async Task<ActionResult<OrderDto>> UpdateOrderSatus(int id)
+        {
+            var order = await _orderService.GetOrderData(id);
+
+            if (order == null) return NotFound(new ApisResponse(404));
+
+            order.Status = OrderStatus.placed;
+
+            var updatedOrder =await _orderService.UpdateOrderStatus(order);
+
+            if(updatedOrder == null) return NotFound(new ApisResponse(404));
+
+            return Ok(_mapper.Map<Order , OrderDto>(updatedOrder));
+
+        }
     }
 }
