@@ -1,8 +1,10 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Order_Management_System.Extentions;
 using Order_Management_System.Helpers;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Repository.Data;
@@ -27,52 +29,23 @@ namespace Order_Management_System
             #region Services
             // Add services to the container.
 
+            //ReferenceLoopHandling
             builder.Services.AddControllers()
               .AddNewtonsoftJson(Options =>
               {
                   Options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
               });
 
-            builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
-
-            builder.Services.AddScoped(typeof(IProductService), typeof(ProductService));
-
-            builder.Services.AddScoped(typeof(ICustomerService), typeof(CustomerService));
-
-            builder.Services.AddScoped(typeof(IOrderService), typeof(OrderService));
-
-            builder.Services.AddScoped(typeof(IInvoiceService), typeof(InvoiceSerive));
-
-
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
-
+            //dbContext
             builder.Services.AddDbContext<OrderManagementDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            //my own extention method
+            builder.Services.ApplicationServices();
 
-            //add auth service
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(JwtBearerOptions =>
-                {
-                    JwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = builder.Configuration["jwt:validIssuer"],
-                        ValidateAudience = true,
-                        ValidAudience = builder.Configuration["jwt:validAudience"],
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwt:AuthKey"])),
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero,
-                    };
-                });
-            //add DI for auth service to add token
-            builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
+            //auth services
+            builder.Services.AddAuthServicees(builder.Configuration);
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -120,6 +93,9 @@ namespace Order_Management_System
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            //handling when the user tryng to reach endpoind not existed
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
             app.UseHttpsRedirection();
 
