@@ -12,13 +12,11 @@ using System.Collections.Generic;
 
 namespace Order_Management_System.Controllers
 {
-   
     public class OrdersController : BaseApiController
     {
         private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
         private readonly IInvoiceService _invoiceService;
-
         public OrdersController(IOrderService orderService,IMapper mapper,IInvoiceService invoiceService)
         {
             _orderService = orderService;
@@ -43,7 +41,6 @@ namespace Order_Management_System.Controllers
 
             return Ok(_mapper.Map<Order, OrderDto>(mappedOrder));
         }
-
         [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [HttpGet("{id}")]
@@ -55,7 +52,6 @@ namespace Order_Management_System.Controllers
 
             return Ok(_mapper.Map<Order, OrderDto>(order));
         }
-
         [ProducesResponseType(typeof(IReadOnlyList<OrderDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]

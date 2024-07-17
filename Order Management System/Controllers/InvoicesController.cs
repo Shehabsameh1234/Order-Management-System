@@ -10,12 +10,10 @@ using OrderSys.Core.Service.Contract;
 
 namespace Order_Management_System.Controllers
 {
-  
     public class InvoicesController : BaseApiController
     {
         private readonly IInvoiceService _invoiceService;
         private readonly IMapper _mapper;
-
         public InvoicesController(IInvoiceService invoiceService,IMapper mapper)
         {
             _invoiceService = invoiceService;
@@ -33,7 +31,6 @@ namespace Order_Management_System.Controllers
 
             return Ok(_mapper.Map<IReadOnlyList<Invoice>, IReadOnlyList<InvoiceDto>>(Invoices));
         }
-
         [ProducesResponseType(typeof(InvoiceDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
