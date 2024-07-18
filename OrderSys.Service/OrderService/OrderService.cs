@@ -95,7 +95,7 @@ namespace OrderSys.Service.OrderService
             {
                 Title = "Update Order Status",
                 To = customer.Email,
-                Body = $"you order number {order.Id} has been blaced",
+                Body = $"you order number {order.Id} has been placed",
             };
             EmailSetting.SendEmail(email);
 
