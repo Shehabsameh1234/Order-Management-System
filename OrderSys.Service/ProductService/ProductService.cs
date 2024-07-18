@@ -35,21 +35,21 @@ namespace OrderSys.Service.ProductService
             return product;
         }
 
-        public async Task<int?> UpdateProductAsync(Product product)
+        public async Task<Product?> UpdateProductAsync(Product product)
         {
-            var user = await _unitOfWork.Repository<Product>().GetAsync(product.Id);
+            var productFromDb = await _unitOfWork.Repository<Product>().GetAsync(product.Id);
 
-            if (user == null) return null;
+            if (productFromDb == null) return null;
 
-            user.Stock = product.Stock;
-            user.Price  = product.Price;
-            user.Name = product.Name;
+            productFromDb.Stock = product.Stock;
+            productFromDb.Price  = product.Price;
+            productFromDb.Name = product.Name;
 
-            _unitOfWork.Repository<Product>().Update(user);
+            _unitOfWork.Repository<Product>().Update(productFromDb);
 
-            var result = await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync();
 
-            return result;
+            return productFromDb;
         }
     }
 }

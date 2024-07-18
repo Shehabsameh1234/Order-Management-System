@@ -12,6 +12,8 @@ namespace Order_Management_System.Helpers
 
             CreateMap<Customer, CustomerDto>().ReverseMap();
 
+            CreateMap<Customer, CustomerDtoWithOrders>().ReverseMap();
+
             CreateMap<Order, OrderDto>().ReverseMap();
 
             CreateMap<Order, OrderCustomerDto>();
