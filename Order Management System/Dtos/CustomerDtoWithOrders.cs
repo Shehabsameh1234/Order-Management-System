@@ -1,9 +1,8 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Order_Management_System.Dtos
 {
-    public class CustomerDto
+    public class CustomerDtoWithOrders
     {
         public int Id { get; set; }
         [Required]
@@ -12,5 +11,6 @@ namespace Order_Management_System.Dtos
         [EmailAddress]
         public string Email { get; set; } = null!;
 
+        public IReadOnlyList<OrderCustomerDto> Orders { get; set; } = null!;
     }
 }

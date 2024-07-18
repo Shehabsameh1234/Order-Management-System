@@ -19,9 +19,9 @@ namespace Order_Management_System.Controllers
         [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [HttpPost]
-        public async Task<ActionResult<Customer>> AddNewCustomer(CustomerDto model)
+        public async Task<ActionResult<CustomerDto>> AddNewCustomer(CustomerDto customer)
         {
-            var mappedCustomer= _mapper.Map<CustomerDto,Customer>(model);
+            var mappedCustomer= _mapper.Map<CustomerDto,Customer>(customer);
 
             var result =await _customerService.AddNewCustomer(mappedCustomer);
 
@@ -32,13 +32,13 @@ namespace Order_Management_System.Controllers
         [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status404NotFound)]
         [HttpGet("{id}/orders")]
-        public async Task<ActionResult<CustomerDto>> GetOredersForCustomer(int id)
+        public async Task<ActionResult<CustomerDtoWithOrders>> GetOredersForCustomer(int id)
         {
             var customer =await _customerService.GetCustomer(id);
 
             if (customer == null) return NotFound(new ApisResponse(404));
 
-            var mappedCustomer = _mapper.Map<Customer, CustomerDto>(customer);
+            var mappedCustomer = _mapper.Map<Customer, CustomerDtoWithOrders>(customer);
 
             return Ok(mappedCustomer);
         }
