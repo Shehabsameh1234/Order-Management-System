@@ -8,7 +8,7 @@ namespace OrderSys.Core.Service.Contract
         Task<IReadOnlyList<Product>> GetAllProductsAsync();
         Task<Product?> GetProductAsync(int id);
         Task<int> AddProductAsync(Product product);
-        Task<int?> UpdateProductAsync(Product produc);
+        Task<Product?> UpdateProductAsync(Product produc);
 
     }
 }
