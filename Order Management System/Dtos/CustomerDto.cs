@@ -1,4 +1,4 @@
-﻿using OrderSys.Core.Entities;
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace Order_Management_System.Dtos

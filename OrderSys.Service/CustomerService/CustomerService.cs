@@ -1,12 +1,6 @@
 ﻿using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Core.Specifications.CustomerSpecifications;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Talabat.Core;
 
 namespace OrderSys.Service.CustomerService

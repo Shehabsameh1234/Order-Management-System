@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Order_Management_System.Dtos;
 using Order_Management_System.Errors;
 using OrderSys.Core.Entities;
@@ -8,7 +6,7 @@ using OrderSys.Core.Entities.Enums;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Core.Specifications.UserSpecifications;
 using Talabat.Core;
-using Talabat.Repository;
+
 
 namespace Order_Management_System.Controllers
 {

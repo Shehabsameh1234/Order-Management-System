@@ -4,7 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 using Order_Management_System.Errors;
 using Order_Management_System.Helpers;
 using OrderSys.Core.Service.Contract;
-using OrderSys.Repository.Data;
 using OrderSys.Service.AuthService;
 using OrderSys.Service.CustomerService;
 using OrderSys.Service.InvoiceSerivce;

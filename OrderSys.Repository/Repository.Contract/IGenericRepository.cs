@@ -1,10 +1,6 @@
 ﻿using OrderSys.Core.Entities;
 using OrderSys.Core.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace OrderSys.Core.Repository.Contract
 {

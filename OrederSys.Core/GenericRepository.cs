@@ -3,11 +3,7 @@ using OrderSys.Core.Entities;
 using OrderSys.Core.Repository.Contract;
 using OrderSys.Core.Specifications;
 using OrderSys.Repository.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace OrderSys.Repository
 {

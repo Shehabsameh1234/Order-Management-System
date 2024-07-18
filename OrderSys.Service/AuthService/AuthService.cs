@@ -2,13 +2,10 @@
 using Microsoft.IdentityModel.Tokens;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace OrderSys.Service.AuthService
 {
