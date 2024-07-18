@@ -1,22 +1,10 @@
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Order_Management_System.Extentions;
-using Order_Management_System.Helpers;
-using OrderSys.Core.Service.Contract;
+using Order_Management_System.MiddleWares;
 using OrderSys.Repository.Data;
 using OrderSys.Repository.DataSeeding;
-using OrderSys.Service.AuthService;
-using OrderSys.Service.CustomerService;
-using OrderSys.Service.InvoiceSerivce;
-using OrderSys.Service.OrderService;
-using OrderSys.Service.ProductService;
-using System.Text;
-using Talabat.Core;
-using Talabat.Repository;
+
 
 namespace Order_Management_System
 {
@@ -87,6 +75,9 @@ namespace Order_Management_System
 
 
             #region MiddleWares
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
