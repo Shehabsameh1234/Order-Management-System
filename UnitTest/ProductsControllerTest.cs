@@ -125,7 +125,7 @@ namespace UnitTest
                 .Which.Value.Should().BeEquivalentTo(product);
         }
         [Fact]
-        public async Task ProductsController_UpdateProduct_ReturnBadRequest()
+        public async Task ProductsController_UpdateProduct_ReturnNoFound()
         {
             //Arrange
             ProductDto productDto = null;
@@ -135,8 +135,8 @@ namespace UnitTest
             //Act
             var result = await _productsController.UpdateProduct(productDto);
             //Assert
-            result.Should().BeOfType<BadRequestObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400));
+            result.Should().BeOfType<NotFoundObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(404));
         }
     }
 }

@@ -168,7 +168,7 @@ namespace UnitTest
             var result = await _ordersController.UpdateOrderSatus(id);
             //Assert
             result.Result.Should().BeOfType<BadRequestObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400));
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400, "Order Already Placed"));
 
         }
         [Fact]
