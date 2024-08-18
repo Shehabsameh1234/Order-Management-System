@@ -11,6 +11,7 @@ This project is a RESTful API for an  order system application built using .NET 
 - invoice management
 - customer management
 
+
 ## Technologies Used
 
 - .NET Core 8.0
@@ -18,4 +19,5 @@ This project is a RESTful API for an  order system application built using .NET 
 - SQL Server
 - Swagger for API documentation
 - JWT for authentication
+- Xunit Test
 
