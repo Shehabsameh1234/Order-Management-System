@@ -63,7 +63,16 @@ namespace UnitTest
         {
             //Arrange
             var customerId = 1;
-            var customer = new Customer();
+            HashSet<Order> orders = new HashSet<Order>(4)
+            { 
+                new Order{Id=1},
+            };
+
+            var customer = new Customer()
+            { 
+                Orders=orders
+            };
+
             var customerDto = new CustomerDtoWithOrders();
             A.CallTo(()=>_customerService.GetCustomer(customerId)).Returns(Task.FromResult(customer));
             A.CallTo(()=>_mapper.Map<CustomerDtoWithOrders>(customer)).Returns(customerDto);
@@ -81,12 +90,29 @@ namespace UnitTest
             var customer = new Customer();
             var customerDto = new CustomerDtoWithOrders();
             A.CallTo(() => _customerService.GetCustomer(customerId)).Returns(Task.FromResult<Customer>(null));
-            A.CallTo(() => _mapper.Map<CustomerDtoWithOrders>(customer)).Returns(customerDto);
             //Act
             var result = await _customersController.GetOredersForCustomer(customerId);
             //Assert
             result.Result.Should().BeOfType<NotFoundObjectResult>();
                 
+        }
+        [Fact]
+        public async Task CustomersController_GetOredersForCustomer_ReturnNotFound_CustomerHasNoOrders()
+        {
+            //Arrange
+            var customerId = 1;
+            HashSet<Order> orders = new HashSet<Order>(0);
+            var customer = new Customer()
+            {
+                Orders = orders
+            };
+            
+            A.CallTo(() => _customerService.GetCustomer(customerId)).Returns(Task.FromResult(customer));
+            //Act
+            var result = await _customersController.GetOredersForCustomer(customerId);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+
         }
     }
 

@@ -37,9 +37,8 @@ namespace Order_Management_System.Controllers
             var customer =await _customerService.GetCustomer(id);
 
             if (customer == null) return NotFound(new ApisResponse(404));
-
+            if (customer.Orders.Count ==0) return NotFound(new ApisResponse(404, "Customer Has No Orders"));
             var mappedCustomer = _mapper.Map<Customer, CustomerDtoWithOrders>(customer);
-
             return Ok(mappedCustomer);
         }
     }

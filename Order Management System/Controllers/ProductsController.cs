@@ -70,7 +70,7 @@ namespace Order_Management_System.Controllers
 
             var result =await _productService.UpdateProductAsync(mappedModel);
 
-            if (result ==null) return BadRequest(new ApisResponse(400));
+            if (result ==null) return NotFound(new ApisResponse(404));
 
             return Ok(mappedModel);
         }

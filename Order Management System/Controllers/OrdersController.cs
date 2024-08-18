@@ -73,7 +73,7 @@ namespace Order_Management_System.Controllers
 
             if (order == null) return NotFound(new ApisResponse(404));
 
-            if(order.Status == OrderStatus.placed) return BadRequest(new ApisResponse(400));
+            if(order.Status == OrderStatus.placed) return BadRequest(new ApisResponse(400,"Order Already Placed"));
 
             order.Status = OrderStatus.placed;
 
