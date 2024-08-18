@@ -7,176 +7,188 @@ using Order_Management_System.Dtos;
 using OrderSys.Core.Entities.Enums;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
+using FakeItEasy;
+using FluentAssertions;
+using OrderSys.Service.OrderService;
+using Order_Management_System.Errors;
 
 
 namespace UnitTest
 {
     public class OrdersControllerTests
     {
-        private readonly Mock<IOrderService> _mockOrderService;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly Mock<IInvoiceService> _mockInvoiceService;
-        private readonly OrdersController _controller;
-
+        private readonly IOrderService _orderService;
+        private readonly IMapper _mapper;
+        private readonly IInvoiceService _invoiceService;
+        private readonly OrdersController _ordersController;
         public OrdersControllerTests()
         {
-            _mockOrderService = new Mock<IOrderService>();
-            _mockMapper = new Mock<IMapper>();
-            _mockInvoiceService = new Mock<IInvoiceService>();
-
-            _controller = new OrdersController(
-                _mockOrderService.Object,
-                _mockMapper.Object,
-                _mockInvoiceService.Object
-            );
+            _orderService=A.Fake<IOrderService>();
+            _mapper=A.Fake<IMapper>();
+            _invoiceService=A.Fake<IInvoiceService>();
+            _ordersController = new OrdersController(_orderService,_mapper,_invoiceService);
         }
-
         [Fact]
-        public async Task CreateOrder_ValidOrder_ReturnsOk()
+        public async Task OrdersController_CreateOrder_ReturnOk()
         {
-            // Arrange
-            var orderDto = new OrderDto { /* setup orderDto properties */ };
-            var order = new Order { /* setup order properties */ };
-
-            _mockMapper.Setup(m => m.Map<OrderDto, Order>(orderDto)).Returns(order);
-            _mockOrderService.Setup(o => o.CreateNewOrder(order)).ReturnsAsync(order);
-
-            // Act
-            var result = await _controller.CreateOrder(orderDto);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<OrderDto>(okResult.Value);
-            Assert.Equal(orderDto.Id, model.Id); // Example assertion, adjust as per your scenario
+            //Arrange
+            var orderDto = new OrderDto();
+            var order =new Order();
+            A.CallTo(()=>_mapper.Map<OrderDto,Order>(orderDto)).Returns(order);
+            A.CallTo(() =>_orderService.CreateNewOrder(order)).Returns(Task.FromResult(order));
+            A.CallTo(() => _mapper.Map<Order, OrderDto>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.CreateOrder(orderDto);
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(orderDto);
         }
-
         [Fact]
-        public async Task CreateOrder_InvalidOrder_ReturnsBadRequest()
+        public async Task OrdersController_CreateOrder_ReturnBadRequest()
         {
-            // Arrange
-            var orderDto = new OrderDto { /* setup invalid orderDto properties */ };
-
-            // Act
-            var result = await _controller.CreateOrder(orderDto);
-
-            // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            //Arrange
+            var orderDto = new OrderDto();
+            var order = new Order();
+            A.CallTo(() => _mapper.Map<OrderDto, Order>(orderDto)).Returns(order);
+            A.CallTo(() => _orderService.CreateNewOrder(order)).Returns(Task.FromResult<Order>(null));
+            A.CallTo(() => _mapper.Map<Order, OrderDto>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.CreateOrder(orderDto);
+            //Assert
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+                
         }
-
         [Fact]
-        public async Task GetOrder_ExistingOrderId_ReturnsOk()
+        public async Task OrdersController_GetOrder_ReturnOk()
         {
-            // Arrange
-            int orderId = 1;
-            var order = new Order { /* setup order properties */ };
-
-            _mockOrderService.Setup(o => o.GetOrderData(orderId)).ReturnsAsync(order);
-
-            // Act
-            var result = await _controller.GetOrder(orderId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<OrderDto>(okResult.Value);
-            Assert.Equal(order.Id, model.Id); // Example assertion, adjust as per your scenario
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order();
+            A.CallTo(() =>_orderService.GetOrderData(id)).Returns(Task.FromResult(order));
+            A.CallTo(() => _mapper.Map<Order, OrderDto>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.GetOrder(id);
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(orderDto);
         }
-
         [Fact]
-        public async Task GetOrder_NonExistingOrderId_ReturnsNotFound()
+        public async Task OrdersController_GetOrder_ReturnNotFound()
         {
-            // Arrange
-            int nonExistingId = 999;
-
-            _mockOrderService.Setup(o => o.GetOrderData(nonExistingId)).ReturnsAsync((Order)null);
-
-            // Act
-            var result = await _controller.GetOrder(nonExistingId);
-
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order();
+            A.CallTo(() => _orderService.GetOrderData(id)).Returns(Task.FromResult<Order>(null));
+            A.CallTo(() => _mapper.Map<Order, OrderDto>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.GetOrder(id);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
         }
-
         [Fact]
-        public async Task GetOrders_AdminUser_ReturnsOk()
+        public async Task OrdersController_GetOrders_ReturnOk()
         {
-            // Arrange
-            var orders = new List<Order> { /* setup list of orders */ };
+            //Arrange
 
-            _mockOrderService.Setup(o => o.GetAllOrdersAsync()).ReturnsAsync(orders);
+            IReadOnlyList<OrderDto> orderDto = A.Fake<IReadOnlyList<OrderDto>>();
+            IReadOnlyList<Order> order = A.Fake<IReadOnlyList<Order>>();
 
-            // Act
-            var result = await _controller.GetOrders();
+            A.CallTo(() => _orderService.GetAllOrdersAsync()).Returns(Task.FromResult(order));
+            A.CallTo(() => _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderDto>>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.GetOrders();
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(orderDto);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<List<OrderDto>>(okResult.Value);
-            Assert.Equal(orders.Count, model.Count); // Example assertion, adjust as per your scenario
         }
-
         [Fact]
-        public async Task GetOrders_NonAdminUser_ReturnsUnauthorized()
+        public async Task OrdersController_GetOrders_ReturnNotFound()
         {
-            // Arrange
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext()
-            };
+            //Arrange
 
-            // Act
-            var result = await _controller.GetOrders();
+            IReadOnlyList<OrderDto> orderDto = A.Fake<IReadOnlyList<OrderDto>>();
+            IReadOnlyList<Order> order = A.Fake<IReadOnlyList<Order>>();
 
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result.Result);
+            A.CallTo(() => _orderService.GetAllOrdersAsync()).Returns(Task.FromResult<IReadOnlyList<Order>>(null));
+            A.CallTo(() => _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderDto>>(order)).Returns(orderDto);
+            //Act
+            var result = await _ordersController.GetOrders();
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+    
         }
-
         [Fact]
-        public async Task UpdateOrderStatus_ExistingOrderId_ReturnsOk()
+        public async Task OrdersController_UpdateOrderSatus_ReturnOk()
         {
-            // Arrange
-            int orderId = 1;
-            var order = new Order { /* setup order properties */ };
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order();
+            A.CallTo(() =>_orderService.GetOrderData(id)).Returns(Task.FromResult(order));
+            A.CallTo(() =>_orderService.UpdateOrderStatus(order)).Returns(Task.FromResult(order));
+            A.CallTo(() => _invoiceService.GenerateIvoiceForOrderAsync(order)).Returns(1);
+            A.CallTo(() => _mapper.Map<Order, OrderDto>(order)).Returns(orderDto);
 
-            _mockOrderService.Setup(o => o.GetOrderData(orderId)).ReturnsAsync(order);
-            _mockOrderService.Setup(o => o.UpdateOrderStatus(order)).ReturnsAsync(order);
+            //Act
+            var result = await _ordersController.UpdateOrderSatus(id);
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(orderDto);
 
-            // Act
-            var result = await _controller.UpdateOrderSatus(orderId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<OrderDto>(okResult.Value);
-            Assert.Equal(OrderStatus.placed.ToString(), model.Status); // Example assertion, adjust as per your scenario
         }
-
         [Fact]
-        public async Task UpdateOrderStatus_NonExistingOrderId_ReturnsNotFound()
+        public async Task OrdersController_UpdateOrderSatus_ReturnNotFound_OrderIsNull()
         {
-            // Arrange
-            int nonExistingId = 999;
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order();
+            
+            A.CallTo(() => _orderService.GetOrderData(id)).Returns(Task.FromResult<Order>(null));
+ 
+            //Act
+            var result = await _ordersController.UpdateOrderSatus(id);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(404));
 
-            _mockOrderService.Setup(o => o.GetOrderData(nonExistingId)).ReturnsAsync((Order)null);
-
-            // Act
-            var result = await _controller.UpdateOrderSatus(nonExistingId);
-
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
-
         [Fact]
-        public async Task UpdateOrderStatus_OrderAlreadyPlaced_ReturnsBadRequest()
+        public async Task OrdersController_UpdateOrderSatus_ReturnBadRequest_OrderIsPlaced()
         {
-            // Arrange
-            int orderId = 1;
-            var order = new Order { /* setup order properties with Status = OrderStatus.Placed */ };
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order() { Status=OrderStatus.placed };
+            A.CallTo(() => _orderService.GetOrderData(id)).Returns(Task.FromResult(order));
+            //Act
+            var result = await _ordersController.UpdateOrderSatus(id);
+            //Assert
+            result.Result.Should().BeOfType<BadRequestObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400));
 
-            _mockOrderService.Setup(o => o.GetOrderData(orderId)).ReturnsAsync(order);
+        }
+        [Fact]
+        public async Task OrdersController_UpdateOrderSatus_ReturnBadRequest_OrderUpdatedFailed()
+        {
+            //Arrange
+            int id = 1;
+            var orderDto = new OrderDto();
+            var order = new Order();
+            A.CallTo(() => _orderService.GetOrderData(id)).Returns(Task.FromResult(order));
+            A.CallTo(() => _orderService.UpdateOrderStatus(order)).Returns(Task.FromResult<Order>(null));
+            //Act
+            var result = await _ordersController.UpdateOrderSatus(id);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(404));
 
-            // Act
-            var result = await _controller.UpdateOrderSatus(orderId);
-
-            // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
     }
+   
 }
+
+

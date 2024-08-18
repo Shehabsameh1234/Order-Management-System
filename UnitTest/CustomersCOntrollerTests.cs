@@ -1,96 +1,93 @@
 ﻿using AutoMapper;
+using FakeItEasy;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Order_Management_System.Controllers;
 using Order_Management_System.Dtos;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
+using OrderSys.Service.CustomerService;
 
 
 namespace UnitTest
 {
-    public class CustomersCOntrollerTests
+    public class CustomersControllerTests
     {
-        private readonly Mock<ICustomerService> _mockCustomerService;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly CustomersController _controller;
-
-        public CustomersCOntrollerTests()
+        private readonly ICustomerService _customerService;
+        private readonly IMapper _mapper;
+        private readonly CustomersController _customersController;
+        public CustomersControllerTests()
         {
-            _mockCustomerService = new Mock<ICustomerService>();
-            _mockMapper = new Mock<IMapper>();
+            _customerService = A.Fake<ICustomerService>();
+            _mapper = A.Fake<IMapper>();
+            _customersController = new CustomersController(_customerService,_mapper);
 
-            _controller = new CustomersController(
-                _mockCustomerService.Object,
-                _mockMapper.Object
-            );
         }
-
         [Fact]
-        public async Task AddNewCustomer_ValidCustomer_ReturnsOk()
+        public async Task CustomersController_AddNewCustomer_ReturnOk()
         {
-            // Arrange
-            var customerDto = new CustomerDto { /* setup customerDto properties */ };
-            var customer = new Customer { /* setup customer properties */ };
+            //Arrange
+            var customerDto = new CustomerDto();
+            var customer = new Customer ();
 
-            _mockMapper.Setup(m => m.Map<CustomerDto, Customer>(customerDto)).Returns(customer);
-            _mockCustomerService.Setup(c => c.AddNewCustomer(customer)).ReturnsAsync(1); // Assuming 1 is a success result
+            A.CallTo(() => _mapper.Map<CustomerDto, Customer>(customerDto)).Returns(customer);
+            A.CallTo(() => _customerService.AddNewCustomer(customer)).Returns(Task.FromResult(1)); 
 
             // Act
-            var result = await _controller.AddNewCustomer(customerDto);
+            var result = await _customersController.AddNewCustomer(customerDto);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<CustomerDto>(okResult.Value);
-            Assert.Equal(customerDto.Id, model.Id); // Example assertion, adjust as per your scenario
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(customer);
         }
-
         [Fact]
-        public async Task AddNewCustomer_InvalidCustomer_ReturnsBadRequest()
+        public async Task CustomersController_AddNewCustomer_ReturnBadRequest()
         {
-            // Arrange
-            var customerDto = new CustomerDto { /* setup invalid customerDto properties */ };
+            //Arrange
+            var customerDto = new CustomerDto();
+            var customer = new Customer();
+
+            A.CallTo(() => _mapper.Map<CustomerDto, Customer>(customerDto)).Returns(customer);
+            A.CallTo(() => _customerService.AddNewCustomer(customer)).Returns(Task.FromResult(0)); //
 
             // Act
-            var result = await _controller.AddNewCustomer(customerDto);
+            var result = await _customersController.AddNewCustomer(customerDto);
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+                
         }
-
         [Fact]
-        public async Task GetOrdersForCustomer_ExistingCustomerId_ReturnsOk()
+        public async Task CustomersController_GetOredersForCustomer_ReturnOk()
         {
-            // Arrange
-            int customerId = 1;
-            var customer = new Customer { /* setup customer properties */ };
-
-            _mockCustomerService.Setup(c => c.GetCustomer(customerId)).ReturnsAsync(customer);
-            _mockMapper.Setup(m => m.Map<Customer, CustomerDtoWithOrders>(customer))
-                       .Returns(new CustomerDtoWithOrders { /* setup mapped customerDto properties */ });
-
-            // Act
-            var result = await _controller.GetOredersForCustomer(customerId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<CustomerDtoWithOrders>(okResult.Value);
-            Assert.Equal(customerId, model.Id); // Example assertion, adjust as per your scenario
+            //Arrange
+            var customerId = 1;
+            var customer = new Customer();
+            var customerDto = new CustomerDtoWithOrders();
+            A.CallTo(()=>_customerService.GetCustomer(customerId)).Returns(Task.FromResult(customer));
+            A.CallTo(()=>_mapper.Map<CustomerDtoWithOrders>(customer)).Returns(customerDto);
+            //Act
+            var result = await _customersController.GetOredersForCustomer(customerId);
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(customerDto);
         }
-
         [Fact]
-        public async Task GetOrdersForCustomer_NonExistingCustomerId_ReturnsNotFound()
+        public async Task CustomersController_GetOredersForCustomer_ReturnNotFound()
         {
-            // Arrange
-            int nonExistingId = 999;
-
-            _mockCustomerService.Setup(c => c.GetCustomer(nonExistingId)).ReturnsAsync((Customer)null);
-
-            // Act
-            var result = await _controller.GetOredersForCustomer(nonExistingId);
-
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
+            //Arrange
+            var customerId = 1;
+            var customer = new Customer();
+            var customerDto = new CustomerDtoWithOrders();
+            A.CallTo(() => _customerService.GetCustomer(customerId)).Returns(Task.FromResult<Customer>(null));
+            A.CallTo(() => _mapper.Map<CustomerDtoWithOrders>(customer)).Returns(customerDto);
+            //Act
+            var result = await _customersController.GetOredersForCustomer(customerId);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+                
         }
     }
+
 }

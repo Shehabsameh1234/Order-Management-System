@@ -5,6 +5,7 @@ using OrderSys.Core.Entities;
 using OrderSys.Core.Entities.Enums;
 using OrderSys.Core.Service.Contract;
 using OrderSys.Core.Specifications.UserSpecifications;
+using System.Text.Json.Serialization;
 using Talabat.Core;
 
 
@@ -40,7 +41,7 @@ namespace Order_Management_System.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto model)
         {
-            if (CheckUserNameExist(model.Username).Result.Value)
+            if (CheckUserNameExist(model.Username).Result)
                 return BadRequest(new ApisResponse(400, "userName in use try another one"));
 
             if (model.Role !=UserRole.Admin.ToString() && model.Role !=UserRole.Customer.ToString())
@@ -63,11 +64,12 @@ namespace Order_Management_System.Controllers
                 Token="LogIn For Token"
             });
         }
-        [HttpGet("userNameExist")]
-        public async  Task<ActionResult<bool>> CheckUserNameExist(string userName)
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async  Task<bool> CheckUserNameExist(string userName)
         {
             var spec = new UserSpecifications(userName);
-            return await _unitOfWork.Repository<User>().CheckUserNameExsist(spec);
+            var boolean = await _unitOfWork.Repository<User>().CheckUserNameExsist(spec);
+            return boolean ;
         }
     }
     

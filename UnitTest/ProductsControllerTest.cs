@@ -1,182 +1,142 @@
-using AutoMapper;
+﻿using AutoMapper;
+using FakeItEasy;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Order_Management_System.Controllers;
 using Order_Management_System.Dtos;
 using Order_Management_System.Errors;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
-
+using OrderSys.Service.ProductService;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace UnitTest
 {
     public class ProductsControllerTest
     {
-        public class ProductsControllerTests
+        private readonly IProductService _productService;
+        private readonly IMapper _mapper;
+        private readonly ProductsController _productsController;
+        public ProductsControllerTest()
         {
-            private readonly Mock<IProductService> _mockProductService;
-            private readonly Mock<IMapper> _mockMapper;
-            private readonly ProductsController _controller;
+            _productService=A.Fake<IProductService>();
+            _mapper=A.Fake<IMapper>();
+            _productsController = new ProductsController( _productService, _mapper );   
 
-            public ProductsControllerTests()
-            {
-                _mockProductService = new Mock<IProductService>();
-                _mockMapper = new Mock<IMapper>();
-                _controller = new ProductsController(_mockProductService.Object, _mockMapper.Object);
-            }
+        }
+        [Fact]
+        public async Task ProductsController_GetProducts_ReturnOk()
+        {
+            //Arrange
+            var products = A.Fake<IReadOnlyList<Product>>();
+            var productsDto = A.Fake<IReadOnlyList<ProductDto>>();
+            A.CallTo(() => _productService.GetAllProductsAsync()).Returns(products);
+            A.CallTo(() => _mapper.Map<IReadOnlyList<ProductDto>>(products)).Returns(productsDto);
+            //Act
+            var result = await _productsController.GetProducts();
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Should().NotBeNull();
+        }
+        [Fact]
+        public async Task ProductsController_GetProducts_ReturnNotFound()
+        {
+            //Arrange
+            List<Product> products = null;
+            A.CallTo(() => _productService.GetAllProductsAsync()).Returns(products);
+            //Act
+            var result = await _productsController.GetProducts();
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();  
+        }
+        [Fact]
+        public async Task ProductsController_GetProduct_ReturnOk()
+        {
+            //Arrange
+            int productId = 1; 
+            var product =A.Fake<Product>();
+            var productDto = A.Fake<ProductDto>();
+            A.CallTo(() =>_productService.GetProductAsync(productId)).Returns(product);
+            A.CallTo(()=>_mapper.Map<ProductDto>(product)).Returns(productDto);
+            //Act
+            var result =await _productsController.GetProduct(productId);
+            //Assert
+            result.Should().NotBeNull();
+            result.Result.Should().BeOfType<OkObjectResult>();
+        }
+        [Fact]
+        public async Task ProductsController_GetProduct_ReturnNotFound()
+        {
+            //Arrange
+            Product product = null;
+            A.CallTo(() => _productService.GetProductAsync(1)).Returns(product);
+            //Act
+            var result = await _productsController.GetProduct(1);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+        }
+        [Fact]
+        public async Task ProductsController_AddNewProduct_ReturnOk()
+        {
+            // Arrange
+            var productDto = A.Fake<ProductDto>();
+            var product = A.Fake<Product>();
+            A.CallTo(() => _mapper.Map<ProductDto, Product>(productDto)).Returns(product);
+            A.CallTo(() => _productService.AddProductAsync(product)).Returns(Task.FromResult(1));
+            // Act
+            var result = await _productsController.AddNewProduct(productDto);
 
-            [Fact]
-            public async Task GetProducts_ReturnsOkResult()
-            {
-                // Arrange
-                var products = new List<Product> { new Product { Id = 1, Name = "Product 1", Price = 10.99m }, new Product { Id = 2, Name = "Product 2", Price = 15.99m } }; // Sample products list
-                _mockProductService.Setup(service => service.GetAllProductsAsync()).ReturnsAsync(products);
-                _mockMapper.Setup(mapper => mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products))
-                           .Returns(products.Select(p => new ProductDto { Id = p.Id, Name = p.Name, Price = p.Price }).ToList());
+            // Assert
+            result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeEquivalentTo(product);
+        }
+        [Fact]
+        public async Task ProductsController_AddNewProduct_ReturnBadRequest()
+        {
+            // Arrange
+            var productDto = A.Fake<ProductDto>();
+            var product = A.Fake<Product>();
+            A.CallTo(() => _mapper.Map<ProductDto, Product>(productDto)).Returns(product);
+            A.CallTo(() => _productService.AddProductAsync(product)).Returns(Task.FromResult(0));
+            // Act
+            var result = await _productsController.AddNewProduct(productDto);
 
-                // Act
-                var result = await _controller.GetProducts();
-
-                // Assert
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var returnValue = Assert.IsAssignableFrom<IReadOnlyList<ProductDto>>(okResult.Value);
-                Assert.Equal(products.Count, returnValue.Count);
-            }
-
-            [Fact]
-            public async Task GetProducts_ReturnsNotFound()
-            {
-                // Arrange
-                List<Product> products = null; // Simulate empty products list
-                _mockProductService.Setup(service => service.GetAllProductsAsync()).ReturnsAsync(products);
-
-                // Act
-                var result = await _controller.GetProducts();
-
-                // Assert
-                var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
-                var errorResponse = Assert.IsType<ApisResponse>(notFoundResult.Value);
-                Assert.Equal(404, errorResponse.StatusCode);
-            }
-
-            [Fact]
-            public async Task GetProduct_WithValidId_ReturnsOkResult()
-            {
-                // Arrange
-                int productId = 1;
-                var product = new Product { Id = productId, Name = "Test Product", Price = 10.99m }; // Create a test product
-                var productDto = new ProductDto { Id = productId, Name = "Test Product", Price = 10.99m }; // Expected DTO
-
-                _mockProductService.Setup(service => service.GetProductAsync(productId)).ReturnsAsync(product);
-                _mockMapper.Setup(mapper => mapper.Map<Product, ProductDto>(product)).Returns(productDto);
-
-                // Act
-                var result = await _controller.GetProduct(productId);
-
-                // Assert
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var returnValue = Assert.IsType<ProductDto>(okResult.Value);
-                Assert.Equal(productId, returnValue.Id);
-                Assert.Equal(product.Name, returnValue.Name);
-                Assert.Equal(product.Price, returnValue.Price);
-            }
-
-            [Fact]
-            public async Task GetProduct_WithInvalidId_ReturnsNotFound()
-            {
-                // Arrange
-                int productId = 999; // Invalid product ID
-                Product nullProduct = null;
-                _mockProductService.Setup(service => service.GetProductAsync(productId)).ReturnsAsync(nullProduct);
-
-                // Act
-                var result = await _controller.GetProduct(productId);
-
-                // Assert
-                var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
-                var errorResponse = Assert.IsType<ApisResponse>(notFoundResult.Value);
-                Assert.Equal(404, errorResponse.StatusCode);
-            }
-
-            [Fact]
-            public async Task AddNewProduct_ValidProduct_ReturnsOkResult()
-            {
-                // Arrange
-                var productDto = new ProductDto { Name = "New Product", Price = 19.99m }; // Create a test product DTO
-                var product = new Product { Id = 1, Name = "New Product", Price = 19.99m }; // Expected product after mapping
-
-                _mockMapper.Setup(mapper => mapper.Map<ProductDto, Product>(productDto)).Returns(product);
-                _mockProductService.Setup(service => service.AddProductAsync(product)).ReturnsAsync(1); // Simulate successful addition
-
-                // Act
-                var result = await _controller.AddNewProduct(productDto);
-
-                // Assert
-                var okResult = Assert.IsType<OkObjectResult>(result);
-                var returnValue = Assert.IsType<Product>(okResult.Value);
-                Assert.Equal(productDto.Name, returnValue.Name);
-                Assert.Equal(productDto.Price, returnValue.Price);
-            }
-
-            [Fact]
-            public async Task AddNewProduct_InvalidProduct_ReturnsBadRequest()
-            {
-                // Arrange
-                var productDto = new ProductDto { Name = "Invalid Product", Price = -5.99m }; // Invalid product DTO (negative price)
-                var product = new Product { Name = "Invalid Product", Price = -5.99m }; // Invalid product after mapping
-
-                _mockMapper.Setup(mapper => mapper.Map<ProductDto, Product>(productDto)).Returns(product);
-                _mockProductService.Setup(service => service.AddProductAsync(product)).ReturnsAsync(0); // Simulate failure
-
-                // Act
-                var result = await _controller.AddNewProduct(productDto);
-
-                // Assert
-                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-                var errorResponse = Assert.IsType<ApisResponse>(badRequestResult.Value);
-                Assert.Equal(400, errorResponse.StatusCode);
-            }
-
-            [Fact]
-            public async Task UpdateProduct_ValidProduct_ReturnsOkResult()
-            {
-                // Arrange
-                var productDto = new ProductDto { Id = 1, Name = "Updated Product", Price = 29.99m }; // Updated product DTO
-                var updatedProduct = new Product { Id = 1, Name = "Updated Product", Price = 29.99m }; // Expected updated product after mapping
-
-                _mockMapper.Setup(mapper => mapper.Map<ProductDto, Product>(productDto)).Returns(updatedProduct);
-                _mockProductService.Setup(service => service.UpdateProductAsync(updatedProduct)).ReturnsAsync(updatedProduct); // Simulate successful update
-
-                // Act
-                var result = await _controller.UpdateProduct(productDto);
-
-                // Assert
-                var okResult = Assert.IsType<OkObjectResult>(result);
-                var returnValue = Assert.IsType<Product>(okResult.Value);
-                Assert.Equal(productDto.Id, returnValue.Id);
-                Assert.Equal(productDto.Name, returnValue.Name);
-                Assert.Equal(productDto.Price, returnValue.Price);
-            }
-
-            [Fact]
-            public async Task UpdateProduct_InvalidProduct_ReturnsBadRequest()
-            {
-                // Arrange
-                var productDto = new ProductDto { Id = 999, Name = "Invalid Product", Price = -5.99m }; // Invalid product DTO (negative price)
-                var invalidProduct = new Product { Id = 999, Name = "Invalid Product", Price = -5.99m }; // Invalid product after mapping
-
-                _mockMapper.Setup(mapper => mapper.Map<ProductDto, Product>(productDto)).Returns(invalidProduct);
-                _mockProductService.Setup(service => service.UpdateProductAsync(invalidProduct)).ReturnsAsync((Product)null); // Simulate failure
-
-                // Act
-                var result = await _controller.UpdateProduct(productDto);
-
-                // Assert
-                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-                var errorResponse = Assert.IsType<ApisResponse>(badRequestResult.Value);
-                Assert.Equal(400, errorResponse.StatusCode);
-            }
-
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400));
+            
+        }
+        [Fact]
+        public async Task ProductsController_UpdateProduct_ReturnOk()
+        {
+            //Arrange
+            var productDto = A.Fake<ProductDto>();
+            var product = A.Fake<Product>();
+            A.CallTo(() => _mapper.Map<ProductDto, Product>(productDto)).Returns(product);
+            A.CallTo(() => _productService.UpdateProductAsync(product)).Returns(Task.FromResult(product));
+            //Act
+            var result = await _productsController.UpdateProduct(productDto);
+            //Assert
+            result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(product);
+        }
+        [Fact]
+        public async Task ProductsController_UpdateProduct_ReturnBadRequest()
+        {
+            //Arrange
+            ProductDto productDto = null;
+            Product product = null;
+            A.CallTo(() => _mapper.Map<ProductDto, Product>(productDto)).Returns(product);
+            A.CallTo(() => _productService.UpdateProductAsync(product)).Returns(Task.FromResult(product));
+            //Act
+            var result = await _productsController.UpdateProduct(productDto);
+            //Assert
+            result.Should().BeOfType<BadRequestObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(400));
         }
     }
 }

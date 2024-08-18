@@ -19,7 +19,7 @@ namespace Order_Management_System.Controllers
         [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApisResponse), StatusCodes.Status400BadRequest)]
         [HttpPost]
-        public async Task<ActionResult<CustomerDto>> AddNewCustomer(CustomerDto customer)
+        public async Task<ActionResult<Customer>> AddNewCustomer(CustomerDto customer)
         {
             var mappedCustomer= _mapper.Map<CustomerDto,Customer>(customer);
 

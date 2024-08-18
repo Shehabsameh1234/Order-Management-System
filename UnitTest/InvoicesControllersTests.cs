@@ -1,95 +1,79 @@
 ﻿using AutoMapper;
+using FakeItEasy;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using Order_Management_System.Controllers;
 using Order_Management_System.Dtos;
+using Order_Management_System.Errors;
 using OrderSys.Core.Entities;
 using OrderSys.Core.Service.Contract;
+
 
 
 namespace UnitTest
 {
     public class InvoicesControllersTests
     {
-        private readonly Mock<IInvoiceService> _mockInvoiceService;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly InvoicesController _controller;
-
+        private readonly IInvoiceService _invoiceService;
+        private readonly IMapper _mapper;
+        private readonly InvoicesController _invoiceController;
         public InvoicesControllersTests()
         {
-            _mockInvoiceService = new Mock<IInvoiceService>();
-            _mockMapper = new Mock<IMapper>();
-
-            _controller = new InvoicesController(
-                _mockInvoiceService.Object,
-                _mockMapper.Object
-            );
+            _invoiceService=A.Fake<IInvoiceService>();
+            _mapper=A.Fake<IMapper>();
+            _invoiceController = new InvoicesController(_invoiceService, _mapper);
         }
-
         [Fact]
-        public async Task GetInvoices_ReturnsOk()
+        public async Task InvoicesController_GetInvoices_ReturnOk()
         {
-            // Arrange
-            var invoices = new List<Invoice> { /* setup list of invoices */ };
+            //Arrange
+            var invoices =A.Fake<IReadOnlyList<Invoice>>();
+            var invoicesDto = A.Fake<IReadOnlyList<InvoiceDto>>();
+            A.CallTo(()=>_invoiceService.GetAllInvoicesAsync()).Returns(Task.FromResult(invoices));
+            A.CallTo(() => _mapper.Map<IReadOnlyList<InvoiceDto>>(invoices)).Returns(invoicesDto);
+            //Act
+            var result = await _invoiceController.GetInvoices();
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>();
+            result.Should().NotBeNull();
 
-            _mockInvoiceService.Setup(s => s.GetAllInvoicesAsync()).ReturnsAsync(invoices);
-            _mockMapper.Setup(m => m.Map<IReadOnlyList<Invoice>, IReadOnlyList<InvoiceDto>>(invoices))
-                       .Returns(new List<InvoiceDto> { /* setup mapped invoiceDto list */ });
-
-            // Act
-            var result = await _controller.GetInvoices();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<List<InvoiceDto>>(okResult.Value);
-            Assert.Equal(invoices.Count, model.Count); // Example assertion, adjust as per your scenario
         }
-
         [Fact]
-        public async Task GetInvoices_NoInvoices_ReturnsNotFound()
+        public async Task InvoicesController_GetInvoices_ReturnNotFound()
         {
-            // Arrange
-            _mockInvoiceService.Setup(s => s.GetAllInvoicesAsync()).ReturnsAsync((List<Invoice>)null);
-
+            //Arrange
+            A.CallTo(() => _invoiceService.GetAllInvoicesAsync()).Returns(Task.FromResult<IReadOnlyList<Invoice>>(null));
             // Act
-            var result = await _controller.GetInvoices();
-
+            var result = await _invoiceController.GetInvoices();
             // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
+            result.Result.Should().BeOfType<NotFoundObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(404));
         }
-
         [Fact]
-        public async Task GetInvoice_ExistingInvoiceId_ReturnsOk()
+        public async Task InvoicesController_GetInvoice_ReturnOk()
         {
-            // Arrange
-            int invoiceId = 1;
-            var invoice = new Invoice { /* setup invoice properties */ };
-
-            _mockInvoiceService.Setup(s => s.GetInvoiceAsync(invoiceId)).ReturnsAsync(invoice);
-            _mockMapper.Setup(m => m.Map<Invoice, InvoiceDto>(invoice)).Returns(new InvoiceDto { /* setup mapped invoiceDto properties */ });
-
-            // Act
-            var result = await _controller.GetInvoice(invoiceId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var model = Assert.IsType<InvoiceDto>(okResult.Value);
-            Assert.Equal(invoiceId, model.Id); // Example assertion, adjust as per your scenario
+            //Arrange
+            var invoice = A.Fake<Invoice>();
+            var invoiceDto = A.Fake<InvoiceDto>();
+            A.CallTo(()=> _invoiceService.GetInvoiceAsync(1)).Returns(Task.FromResult(invoice));
+            A.CallTo(() => _mapper.Map<InvoiceDto>(invoice)).Returns(invoiceDto);
+            //Act
+            var result = await _invoiceController.GetInvoice(1);
+            //Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(invoiceDto);
         }
-
         [Fact]
-        public async Task GetInvoice_NonExistingInvoiceId_ReturnsNotFound()
+        public async Task InvoicesController_GetInvoice_ReturnNotFound()
         {
-            // Arrange
-            int nonExistingId = 999;
-
-            _mockInvoiceService.Setup(s => s.GetInvoiceAsync(nonExistingId)).ReturnsAsync((Invoice)null);
-
-            // Act
-            var result = await _controller.GetInvoice(nonExistingId);
-
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
+            //Arrange
+            A.CallTo(() => _invoiceService.GetInvoiceAsync(1)).Returns(Task.FromResult<Invoice>(null));
+            //Act
+            var result = await _invoiceController.GetInvoice(1);
+            //Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(new ApisResponse(404));
         }
+
     }
 }
